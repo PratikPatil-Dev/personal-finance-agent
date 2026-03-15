@@ -1,0 +1,37 @@
+{
+  "name": "personal-finance-agent",
+  "version": "1.0.0",
+  "description": "Minimal Node.js + TypeScript starter using tsx",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "NODE_ENV=production tsx src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "set-webhook": "tsx src/scripts/setTGWebhook.ts"
+  },
+  "author": "pratik patil",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PratikPatil-Dev/personal-finance-agent.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PratikPatil-Dev/personal-finance-agent/issues"
+  },
+  "homepage": "https://github.com/PratikPatil-Dev/personal-finance-agent#readme",
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/mongoose": "^5.11.96",
+    "@types/node": "^25.3.3",
+    "nodemon": "^3.1.14",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "mongoose": "^8.23.0",
+    "telegraf": "^4.16.3"
+  }
+}
