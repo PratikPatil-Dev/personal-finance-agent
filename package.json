@@ -8,7 +8,8 @@
     "dev": "tsx watch src/index.ts",
     "start": "NODE_ENV=production tsx src/index.ts",
     "typecheck": "tsc --noEmit",
-    "set-webhook": "tsx src/scripts/setTGWebhook.ts"
+    "set-webhook": "tsx src/scripts/setTGWebhook.ts",
+    "add-test-data": "tsx src/scripts/addTestData.ts"
   },
   "author": "pratik patil",
   "license": "ISC",
@@ -29,10 +30,13 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.82.0",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "mongoose": "^8.23.0",
     "openai": "^6.29.0",
-    "telegraf": "^4.16.3"
+    "supermemory": "^4.17.0",
+    "telegraf": "^4.16.3",
+    "zod": "^4.3.6"
   }
 }

@@ -28,3 +28,12 @@ const conversationSchema = new mongoose.Schema({
 conversationSchema.index({ userId: 1, createdAt: -1 });
 const Conversation = mongoose.model("Conversation", conversationSchema);
 export default Conversation;
+
+export interface IConversation {
+    userId: mongoose.Types.ObjectId;
+    role: "user" | "assistant" | "tool";
+    content: mongoose.Schema.Types.Mixed;
+    toolCallId?: string;
+    toolName?: string;
+    createdAt: Date;
+}

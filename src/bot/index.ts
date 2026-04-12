@@ -3,6 +3,8 @@ dotenv.config();
 import { Telegraf, Context } from "telegraf";
 import { Request as req, Response as res } from "express";
 import { findOrCreateUser } from "../services/user.service.js";
+import { runAgent } from "../agent/index.js";
+import { saveMessage } from "../services/conversation.service.js";
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
 
@@ -23,6 +25,23 @@ bot.start(async (ctx) => {
 
 bot.on('text', async (ctx: Context) => {
     try {
+        if (!ctx?.message?.from?.id || !ctx?.message?.text || !ctx?.chat?.id) {
+            return;
+        }
+        const tgChatId = ctx.chat.id;
+        const name = `${ctx.message.from.first_name} ${ctx.message.from.last_name ?? ""}`.trim();
+        const username = ctx.message.from.username;
+
+        const { isNew, user } = await findOrCreateUser(ctx.message.from.id, tgChatId, name, username)
+
+        const tgUserId = user?._id.toString();
+        const userMessage = ctx.message.text;
+        console.log("tgUserId", tgUserId)
+        console.log("tgChatId", tgChatId)
+        console.log("userMessage", userMessage)
+        const response = await runAgent(tgUserId, userMessage);
+        // console.log("response", response)
+        ctx.reply(response);
         // 1. get user from DB, validate exists
 
         // 2. fetch last 15 messages from Conversations collection
@@ -41,6 +60,7 @@ bot.on('text', async (ctx: Context) => {
 
         // 9. send final response to user on Telegram
     } catch (error) {
+        console.log(error)
         await ctx.reply("Something went wrong. Please try again.");
     }
 });

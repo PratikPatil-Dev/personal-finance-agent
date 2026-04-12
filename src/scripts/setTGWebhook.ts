@@ -2,7 +2,7 @@ import { Telegraf } from "telegraf";
 import dotenv from "dotenv";
 dotenv.config();
 
-const NGROK_URL = "https://af19-103-170-10-253.ngrok-free.app";
+const NGROK_URL = "https://99f5-103-170-10-253.ngrok-free.app";
 const BASE_URL = process.env.BASE_URL || NGROK_URL;
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
