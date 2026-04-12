@@ -33,6 +33,10 @@ const updateMemory = async (
     expiresAt?: Date
 ) => {
     try {
+        console.log("memoryId", memoryId)
+        console.log("memory", memory)
+        console.log("type", type)
+        console.log("expiresAt", expiresAt)
         const memroyUpdated = await UserMemory.findByIdAndUpdate(
             memoryId,
             { $set: { content: memory, type, expiresAt } },

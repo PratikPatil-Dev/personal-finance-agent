@@ -43,7 +43,7 @@ const addTransaction = {
 
 const updateTransaction = {
     name: "update_transaction",
-    description: "update a transaction user corrected based on transactionId, like change in amount, or transaction category or description",
+    description: "Update an existing transaction. IMPORTANT: You must have a real MongoDB transaction ID from a previous get_transaction call. Never guess or fabricate a transactionId. If you don't have a real ID, call get_transaction first to find it.",
     input_schema: {
         type: "object" as const,
         properties: {

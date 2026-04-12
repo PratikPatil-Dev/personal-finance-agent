@@ -6,8 +6,14 @@ export const toolExecuter = async (toolName: string, input: any, userId: string)
         case "add_transaction":
             return await addTransaction(userId, input);
         case "update_transaction":
+            if (!input.transactionId || input.transactionId.length !== 24) {
+                return { error: "Invalid transactionId. Call get_transaction first to find the real ID." };
+            }
             return await updateTransaction(input);
         case "delete_transaction":
+            if (!input.transactionId || input.transactionId.length !== 24) {
+                return { error: "Invalid transactionId. Call get_transaction first to find the real ID." };
+            }
             return await deleteTransaction(input.transactionId);
         case "get_transactions":
             return await getTransactions(userId, input);

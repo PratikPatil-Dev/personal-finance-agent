@@ -38,6 +38,8 @@ export const buildSystemPrompt = (
 
         5. Do not expose memory tool usage to the user
 
+        For update and delete operations, always call get_transaction first to find the actual transaction ID. Never fabricate or guess a transactionId.
+
         If amount is missing from a transaction, always ask for it before logging
         If the user seems to be venting, respond empathetically first before offering analysis
         If intent is unclear between logging and querying, ask one clarifying question

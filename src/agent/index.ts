@@ -5,11 +5,10 @@ import { getRecentConversations, saveMessage } from "../services/conversation.se
 import { getMemory } from "../services/memory.service.js";
 import type { IConversation } from "../models/conversation.model.js";
 import type { IUserMemory } from "../models/userMemory.model.js";
-import { searchPersistentMemory } from "../services/supermemory.service.js";
-import { formatConversations, formatLocalMemories } from "../utils/formatingFunctions.js";
+import { addPersistentMemory, searchPersistentMemory } from "../services/supermemory.service.js";
+import { formatConversations, formatLocalMemories, formatPersistentMemories } from "../utils/formatingFunctions.js";
 import { config } from "../config/env.js";
 import Anthropic from "@anthropic-ai/sdk";
-import { addTransaction, updateTransaction, deleteTransaction, getTransactions } from "../services/transaction.service.js";
 import { toolExecuter } from "./toolExecutor.js";
 
 const client = new Anthropic({
@@ -27,10 +26,15 @@ export const runAgent = async (
         searchPersistentMemory(userId, userMessage)
     ]);
 
-    await saveMessage(userId, "user", userMessage);
+    await Promise.all([
+        saveMessage(userId, "user", userMessage),
+        addPersistentMemory(userId, userMessage)
+    ]);
 
     const formattedMessages = formatConversations(conversations as IConversation[])
     const formattedLocalMemories = formatLocalMemories(localMemories as IUserMemory[])
+    const formattedPersistentMemories = formatPersistentMemories(persistentMemories);
+
 
     const formattedHistory = conversations
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
@@ -39,7 +43,7 @@ export const runAgent = async (
             content: String(c.content)
         }));
 
-    const systemPrompt = buildSystemPrompt(formattedMessages, formattedLocalMemories, '')
+    const systemPrompt = buildSystemPrompt(formattedMessages, formattedLocalMemories, formattedPersistentMemories)
 
     let message = await client.messages.create({
         max_tokens: 1024,
@@ -54,7 +58,7 @@ export const runAgent = async (
         tools: tools,
         model: "claude-sonnet-4-20250514"
     })
-    console.log("message", message)
+    // console.log("message", message)
     while (message.stop_reason === "tool_use") {
         const toolBlocks = message.content.filter(block => block.type === "tool_use");
         const toolResults = [];

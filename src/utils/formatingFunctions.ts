@@ -14,11 +14,22 @@ const formatLocalMemories = (memories: IUserMemory[]): string => {
     }).join("\n");
 }
 
-const formatPersistentMemories = (memories: any): string => {
-    return memories?.map((memory: any) => {
-        return `memory: ${memory.content}`;
-    }).join("\n");
-}
+const formatPersistentMemories = (persistentMemories: any): string => {
+    if (!persistentMemories) return "";
+
+    const dynamic = persistentMemories?.profile?.dynamic ?? [];
+    const searchResults = persistentMemories?.searchResults?.results ?? [];
+
+    const profileContext = dynamic.length > 0
+        ? `User Profile:\n${dynamic.join("\n")}`
+        : "";
+
+    const searchContext = searchResults.length > 0
+        ? `Relevant Context:\n${searchResults.map((r: any) => r.memory).join("\n")}`
+        : "";
+
+    return [profileContext, searchContext].filter(Boolean).join("\n\n");
+};
 
 export {
     formatConversations,
