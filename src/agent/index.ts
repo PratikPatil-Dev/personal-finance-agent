@@ -1,6 +1,6 @@
 import { buildSystemPrompt } from "./prompts.js";
 import { tools } from "../tools/index.js";
-import UserMemory from "../models/userMemory.model.js";
+// import UserMemory from "../models/userMemory.model.js";
 import { getRecentConversations, saveMessage } from "../services/conversation.service.js";
 import { getMemory } from "../services/memory.service.js";
 import type { IConversation } from "../models/conversation.model.js";
@@ -22,7 +22,7 @@ export const runAgent = async (
 
     const [conversations, localMemories, persistentMemories] = await Promise.all([
         getRecentConversations(userId),
-        getMemory(userId),
+        getMemory(userId, userMessage),
         searchPersistentMemory(userId, userMessage)
     ]);
 
@@ -56,10 +56,20 @@ export const runAgent = async (
             }
         ],
         tools: tools,
-        model: "claude-sonnet-4-20250514"
+        model: config.model || "claude-haiku-4-5-20251001"
     })
     // console.log("message", message)
+    const MAX_TOOL_ITERATIONS = 8;
+    let toolIterations = 0;
     while (message.stop_reason === "tool_use") {
+        toolIterations++;
+        if (toolIterations > MAX_TOOL_ITERATIONS) {
+            console.log(`Tool-use loop exceeded ${MAX_TOOL_ITERATIONS} iterations for user ${userId}, aborting.`);
+            const fallback = "Hey, I'm having trouble finishing that request right now. Could you try rephrasing it or breaking it into smaller steps?";
+            await saveMessage(userId, "assistant", fallback);
+            return fallback;
+        }
+
         const toolBlocks = message.content.filter(block => block.type === "tool_use");
         const toolResults = [];
 
@@ -85,7 +95,7 @@ export const runAgent = async (
                 { role: "user", content: toolResults }
             ],
             tools: tools,
-            model: "claude-sonnet-4-20250514",
+            model: config.model || "claude-haiku-4-5-20251001",
         });
         
     }

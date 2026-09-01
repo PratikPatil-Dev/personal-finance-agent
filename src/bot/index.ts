@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
-import { Telegraf, Context } from "telegraf";
+import { Telegraf } from "telegraf";
 import { Request as req, Response as res } from "express";
 import { findOrCreateUser } from "../services/user.service.js";
 import { runAgent } from "../agent/index.js";
@@ -23,7 +23,7 @@ bot.start(async (ctx) => {
     }
 });
 
-bot.on('text', async (ctx: Context) => {
+bot.on('text', async (ctx) => {
     try {
         if (!ctx?.message?.from?.id || !ctx?.message?.text || !ctx?.chat?.id) {
             return;

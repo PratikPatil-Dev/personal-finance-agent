@@ -7,5 +7,6 @@ export const config = {
     telegramBotToken: process.env.TELEGRAM_BOT_TOKEN,
     supermemoryApiKey: process.env.SUPERMEMORY_API_KEY,
     openaiApiKey: process.env.OPENAI_API_KEY,
-    anthropicApiKey: process.env.ANTHROPIC_API_KEY
+    anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+    model: process.env.MODEL
 }

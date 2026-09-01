@@ -1,9 +1,10 @@
 import UserMemory from "../models/userMemory.model.js";
 
-const getMemory = async (userId: string) => {
+const getMemory = async (userId: string, query: string) => {
     return await UserMemory.find({
         userId: userId,
         isActive: true,
+        $text: { $search: query },
         $or: [
             { expiresAt: { $gt: new Date() } },
             { expiresAt: null }
@@ -28,21 +29,22 @@ const addMemory = async (userId: string, type: "goal" | "preferences" | "relatio
 
 const updateMemory = async (
     memoryId: string,
-    memory: string,
-    type: "goal" | "preferences" | "relationship" | "habits" | "other",
+    memory?: string,
+    type?: "goal" | "preferences" | "relationship" | "habits" | "other",
     expiresAt?: Date
 ) => {
     try {
-        console.log("memoryId", memoryId)
-        console.log("memory", memory)
-        console.log("type", type)
-        console.log("expiresAt", expiresAt)
-        const memroyUpdated = await UserMemory.findByIdAndUpdate(
+        const update: Record<string, unknown> = {};
+        if (memory !== undefined) update.content = memory;
+        if (type !== undefined) update.type = type;
+        if (expiresAt !== undefined) update.expiresAt = expiresAt;
+
+        const memoryUpdated = await UserMemory.findByIdAndUpdate(
             memoryId,
-            { $set: { content: memory, type, expiresAt } },
+            { $set: update },
             { new: true }
         );
-        return memroyUpdated;
+        return memoryUpdated;
     } catch (error) {
         console.log("Error updating memory:", error);
         throw "Failed to update memory";

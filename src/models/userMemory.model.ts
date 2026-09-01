@@ -24,7 +24,8 @@ const userMemorySchema = new mongoose.Schema({
     },
 }, { timestamps: true });
 
-userMemorySchema.index({ userId: 1, isActive: 1 }); 
+userMemorySchema.index({ userId: 1, isActive: 1 });
+userMemorySchema.index({ content: "text" });
 const UserMemory = mongoose.model("UserMemory", userMemorySchema);
 export default UserMemory;
 
