@@ -15,9 +15,15 @@ const client = new Anthropic({
     apiKey: config.anthropicApiKey,
 });
 
+export interface ImageInput {
+    base64: string;
+    mediaType: "image/jpeg" | "image/png" | "image/gif" | "image/webp";
+}
+
 export const runAgent = async (
     userId: string,
-    userMessage: string
+    userMessage: string,
+    images?: ImageInput[]
 ): Promise<string> => {
 
     const [conversations, localMemories, persistentMemories] = await Promise.all([
@@ -26,10 +32,25 @@ export const runAgent = async (
         searchPersistentMemory(userId, userMessage)
     ]);
 
+    const historyNote = images?.length ? `${userMessage} [attached ${images.length} image(s)]` : userMessage;
     await Promise.all([
-        saveMessage(userId, "user", userMessage),
+        saveMessage(userId, "user", historyNote),
         addPersistentMemory(userId, userMessage)
     ]);
+
+    const userContent: Anthropic.MessageParam["content"] = images?.length
+        ? [
+            ...images.map((image) => ({
+                type: "image" as const,
+                source: {
+                    type: "base64" as const,
+                    media_type: image.mediaType,
+                    data: image.base64,
+                },
+            })),
+            { type: "text" as const, text: userMessage },
+        ]
+        : userMessage;
 
     const formattedMessages = formatConversations(conversations as IConversation[])
     const formattedLocalMemories = formatLocalMemories(localMemories as IUserMemory[])
@@ -52,7 +73,7 @@ export const runAgent = async (
             ...formattedHistory,
             {
                 role: "user",
-                content: userMessage
+                content: userContent
             }
         ],
         tools: tools,
@@ -90,7 +111,7 @@ export const runAgent = async (
             system: systemPrompt,
             messages: [
                 ...formattedHistory,
-                { role: "user", content: userMessage },
+                { role: "user", content: userContent },
                 { role: "assistant", content: message.content },
                 { role: "user", content: toolResults }
             ],
