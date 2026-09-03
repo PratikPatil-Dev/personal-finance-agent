@@ -12,7 +12,7 @@ const getMemory = async (userId: string, query: string) => {
     });
 }
 
-const addMemory = async (userId: string, type: "goal" | "preferences" | "relationship" | "habits" | "other", content: string, expiresAt?: Date) => {
+const addMemory = async (userId: string, type: "goal" | "budget" | "preferences" | "relationship" | "habits" | "other", content: string, expiresAt?: Date) => {
     try {
         const memory = await UserMemory.create({
             userId,
@@ -30,7 +30,7 @@ const addMemory = async (userId: string, type: "goal" | "preferences" | "relatio
 const updateMemory = async (
     memoryId: string,
     memory?: string,
-    type?: "goal" | "preferences" | "relationship" | "habits" | "other",
+    type?: "goal" | "budget" | "preferences" | "relationship" | "habits" | "other",
     expiresAt?: Date
 ) => {
     try {

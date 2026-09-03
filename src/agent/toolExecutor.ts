@@ -16,6 +16,7 @@ const isValidObjectId = (id: unknown): id is string =>
     typeof id === "string" && /^[a-f\d]{24}$/i.test(id);
 
 export const toolExecuter = async (toolName: string, input: unknown, userId: string) => {
+    console.log("toolName", toolName, input)
     switch (toolName) {
         case "add_transaction": {
             const parsed = AddTransactionSchema.parse(input);

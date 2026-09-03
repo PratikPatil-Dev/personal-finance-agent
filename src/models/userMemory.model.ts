@@ -7,7 +7,7 @@ const userMemorySchema = new mongoose.Schema({
         required: true,
     },
     type: {
-        enum: ["goal", "preferences", "relationship", "habits", "other"],
+        enum: ["goal", "budget", "preferences", "relationship", "habits", "other"],
         type: String,
         required: true,
     },
@@ -31,7 +31,7 @@ export default UserMemory;
 
 export interface IUserMemory {
     userId: mongoose.Types.ObjectId;
-    type: "goal" | "preferences" | "relationship" | "habits" | "other";
+    type: "goal" | "budget" | "preferences" | "relationship" | "habits" | "other";
     content: string;
     expiresAt?: Date;
     isActive: boolean;

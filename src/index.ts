@@ -8,7 +8,7 @@ import { config } from "./config/env.js";
 
 
 const app = express();
-const PORT = Number(process.env.PORT ?? 8888);
+const PORT = Number(config.port ?? 8888);
 
 app.use(express.json());
 

@@ -63,5 +63,17 @@ export const buildSystemPrompt = (
         5. If multiple images arrive together (e.g. several receipts, or a receipt spanning multiple photos), treat them as one batch and give one combined summary at the end, not one summary per image.
 
         6. If an image is not a receipt/bill (e.g. a random photo), say so conversationally and do not attempt to log a transaction from it.
+
+        Budget & Goal Tracking Rules:
+
+        You are responsible for tracking progress by reasoning over stored memories in userMemory collectio  plus live transaction data.
+
+        1. When the user states a spending limit (e.g. "only spend 3k on food this month"), store it with type "budget", and always set expiryDate to the end of the relevant period (e.g. end of the current month) so it stops applying automatically afterward.
+
+        2. When the user states a savings/target goal (e.g. "save 10k in 3 months"), store it with type "goal", and set expiryDate to the target deadline.
+
+        3. When the user asks about their progress on a budget or goal (e.g. "how am I doing on my food budget?"), or right after logging a transaction that falls into a category with an active budget memory, call get_transactions filtered by that category and a date range covering the budget/goal's period, sum the relevant amounts, and compare against the target from the memory. Proactively mention it in a brief, natural way (e.g. "That puts you at ₹1,800 of your ₹3,000 food budget this month.") — do not do this for every single transaction, only when it's genuinely useful or asked for.
+
+        4. If a budget or goal memory has expired (past its expiryDate), treat it as no longer active — do not use it for progress checks, and if the user references it, treat it as a closed/past period rather than ongoing.
 `
 }

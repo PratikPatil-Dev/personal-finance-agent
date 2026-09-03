@@ -4,7 +4,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 const toInputSchema = (schema: z.ZodType): Anthropic.Tool.InputSchema =>
     z.toJSONSchema(schema) as Anthropic.Tool.InputSchema;
 
-const memoryTypeEnum = z.enum(["goal", "preferences", "relationship", "habits", "other"]);
+const memoryTypeEnum = z.enum(["goal", "budget", "preferences", "relationship", "habits", "other"]);
 
 export const AddMemorySchema = z.object({
     memory: z.string().describe("event, goal, content that needs to be stored as a user's memory"),
@@ -15,7 +15,7 @@ export type AddMemoryInput = z.infer<typeof AddMemorySchema>;
 
 const addMemory = {
     name: "add_memory",
-    description: "add a important memory like users goals, plans, habbits, preferrances, relationships, etc.",
+    description: "add a important memory like users goals, budgets, plans, habbits, preferrances, relationships, etc. Use type 'budget' for spending limits (eg. 'spend only 3k on food this month') and type 'goal' for savings/target goals (eg. 'save 10k in 3 months'). Always set expiryDate for time-bound goals/budgets so they don't get applied after the period ends.",
     input_schema: toInputSchema(AddMemorySchema),
 };
 

@@ -8,5 +8,7 @@ export const config = {
     supermemoryApiKey: process.env.SUPERMEMORY_API_KEY,
     openaiApiKey: process.env.OPENAI_API_KEY,
     anthropicApiKey: process.env.ANTHROPIC_API_KEY,
-    model: process.env.MODEL
+    model: process.env.MODEL,
+    telegramWebhookSecret: process.env.TELEGRAM_WEBHOOK_SECRET,
+    baseUrl: process.env.BASE_URL
 }

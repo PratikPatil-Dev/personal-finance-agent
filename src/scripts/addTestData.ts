@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
+import mongoose from "mongoose";
 import { connectDb } from "../config/database.js"
 import Conversation from "../models/conversation.model.js"
 import UserMemory from "../models/userMemory.model.js"
@@ -81,6 +82,8 @@ const loadData = async () => {
         console.log("User Memories", userMemories)
     } catch (error) {
         console.log(error)
+    } finally {
+        await mongoose.disconnect();
     }
 }
 

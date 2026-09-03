@@ -1,12 +1,21 @@
 import dotenv from "dotenv";
 dotenv.config();
+import crypto from "node:crypto";
 import { Telegraf } from "telegraf";
 import { Request as req, Response as res } from "express";
 import { findOrCreateUser } from "../services/user.service.js";
 import { runAgent, type ImageInput } from "../agent/index.js";
 import { saveMessage } from "../services/conversation.service.js";
+import { config } from "../config/env.js";
 
-const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
+const bot = new Telegraf(config.telegramBotToken!);
+
+const isValidWebhookSecret = (headerValue: unknown): boolean => {
+    if (!config.telegramWebhookSecret || typeof headerValue !== "string") return false;
+    const expected = Buffer.from(config.telegramWebhookSecret);
+    const actual = Buffer.from(headerValue);
+    return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
+};
 
 const PHOTO_BATCH_WINDOW_MS = 2500;
 
@@ -126,7 +135,20 @@ bot.on('photo', async (ctx) => {
 
 export const botMiddleware = bot
 export const handleWebhook = async (req: req, res: res) => {
+    if (!isValidWebhookSecret(req.headers["x-telegram-bot-api-secret-token"])) {
+        console.log("Rejected webhook request with invalid or missing secret token");
+        res.sendStatus(401);
+        return;
+    }
 
     console.log("Received webhook from Telegram");
-    await bot.handleUpdate(req.body, res);
+    try {
+        await bot.handleUpdate(req.body, res);
+    } catch (error) {
+        console.log("Error handling Telegram webhook update", error);
+    } finally {
+        if (!res.headersSent) {
+            res.sendStatus(200);
+        }
+    }
 }
