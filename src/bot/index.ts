@@ -50,13 +50,12 @@ const flushPhotoBuffer = async (userId: string) => {
         const response = await runAgent(userId, caption, buffer.images);
         await bot.telegram.sendMessage(buffer.tgChatId, response);
     } catch (error) {
-        console.log(error);
+        console.error("Error processing buffered images:", error);
         await bot.telegram.sendMessage(buffer.tgChatId, "Something went wrong processing those images. Please try again.");
     }
 };
 
 bot.start(async (ctx) => {
-    console.log(ctx.message)
     const tgUserId = ctx.message.from.id
     const tgChatId = ctx.chat.id
     const name = `${ctx.message.from.first_name} ${ctx.message.from.last_name ?? ""}`.trim();
@@ -83,14 +82,11 @@ bot.on('text', async (ctx) => {
 
         const tgUserId = user?._id.toString();
         const userMessage = ctx.message.text;
-        console.log("tgUserId", tgUserId)
-        console.log("tgChatId", tgChatId)
-        console.log("userMessage", userMessage)
+
         const response = await runAgent(tgUserId, userMessage);
-        // console.log("response", response)
         ctx.reply(response);
     } catch (error) {
-        console.log(error)
+        console.error("Error handling text message:", error);
         await ctx.reply("Something went wrong. Please try again.");
     }
 });
@@ -128,7 +124,7 @@ bot.on('photo', async (ctx) => {
             });
         }
     } catch (error) {
-        console.log(error);
+        console.error("Error handling photo message:", error);
         await ctx.reply("Something went wrong processing that image. Please try again.");
     }
 });
@@ -136,16 +132,15 @@ bot.on('photo', async (ctx) => {
 export const botMiddleware = bot
 export const handleWebhook = async (req: req, res: res) => {
     if (!isValidWebhookSecret(req.headers["x-telegram-bot-api-secret-token"])) {
-        console.log("Rejected webhook request with invalid or missing secret token");
+        console.warn("Rejected webhook request with invalid or missing secret token");
         res.sendStatus(401);
         return;
     }
 
-    console.log("Received webhook from Telegram");
     try {
         await bot.handleUpdate(req.body, res);
     } catch (error) {
-        console.log("Error handling Telegram webhook update", error);
+        console.error("Error handling Telegram webhook update:", error);
     } finally {
         if (!res.headersSent) {
             res.sendStatus(200);

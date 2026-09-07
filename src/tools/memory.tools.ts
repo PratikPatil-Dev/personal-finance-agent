@@ -1,7 +1,7 @@
 const addMemory = {
     type: "function",
     name: "add_memory",
-    description: "add a important memory like users goals, plans, habbits, preferrances, relationships, etc.",
+    description: "add a important memory like users goals, plans, habits, preferences, relationships, etc.",
     parameters: {
         type: "object",
         properties: {
@@ -26,7 +26,7 @@ const addMemory = {
 const updateMemory = {
     type: "function",
     name: "update_memory",
-    description: "update a important memory like chnage in goals, plans, habbits, preferrances, relationships, etc. based on memoryId and userId",
+    description: "update a important memory like change in goals, plans, habits, preferences, relationships, etc. based on memoryId and userId",
     parameters: {
         type: "object",
         properties: {
@@ -50,7 +50,7 @@ const updateMemory = {
 const getMemory = {
     type: "function",
     name: "get_memory",
-    description: "get a important memory of user like their goals, plans, habbits, preferrances, relationships, etc. based on userId",
+    description: "get a important memory of user like their goals, plans, habits, preferences, relationships, etc. based on userId",
     parameters: {
         type: "object",
         properties: {

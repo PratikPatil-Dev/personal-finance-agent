@@ -1,12 +1,10 @@
 import { buildSystemPrompt } from "./prompts.js";
 import { tools } from "../tools/index.js";
-// import UserMemory from "../models/userMemory.model.js";
 import { getRecentConversations, saveMessage } from "../services/conversation.service.js";
 import { getMemory } from "../services/memory.service.js";
-import type { IConversation } from "../models/conversation.model.js";
 import type { IUserMemory } from "../models/userMemory.model.js";
 import { addPersistentMemory, searchPersistentMemory } from "../services/supermemory.service.js";
-import { formatConversations, formatLocalMemories, formatPersistentMemories } from "../utils/formatingFunctions.js";
+import { formatLocalMemories, formatPersistentMemories } from "../utils/formatingFunctions.js";
 import { config } from "../config/env.js";
 import Anthropic from "@anthropic-ai/sdk";
 import { toolExecuter } from "./toolExecutor.js";
@@ -14,6 +12,13 @@ import { toolExecuter } from "./toolExecutor.js";
 const client = new Anthropic({
     apiKey: config.anthropicApiKey,
 });
+
+const MODEL = config.model || "claude-haiku-4-5-20251001";
+const MAX_TOKENS = 1024;
+const MAX_TOOL_ITERATIONS = 8;
+
+const FALLBACK_REPLY = "Sorry, something isn't quite right on my end. Give me a moment and try again?";
+const ABORTED_REPLY = "I'm having trouble finishing that request. Could you try rephrasing it, or breaking it into smaller steps?";
 
 export interface ImageInput {
     base64: string;
@@ -52,76 +57,82 @@ export const runAgent = async (
         ]
         : userMessage;
 
-    const formattedMessages = formatConversations(conversations as IConversation[])
-    const formattedLocalMemories = formatLocalMemories(localMemories as IUserMemory[])
-    const formattedPersistentMemories = formatPersistentMemories(persistentMemories);
+    const systemPrompt = buildSystemPrompt(
+        formatLocalMemories(localMemories as IUserMemory[]),
+        formatPersistentMemories(persistentMemories)
+    );
 
-
-    const formattedHistory = conversations
-        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
-        .map(c => ({
-            role: c.role as "user" | "assistant",
-            content: String(c.content)
-        }));
-
-    const systemPrompt = buildSystemPrompt(formattedMessages, formattedLocalMemories, formattedPersistentMemories)
+    // History belongs in `messages`, not the system prompt. Sending it in both
+    // places doubled the token cost of every request in the loop.
+    const messages: Anthropic.MessageParam[] = [
+        ...conversations
+            .slice()
+            .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+            .map(c => ({
+                role: c.role as "user" | "assistant",
+                content: String(c.content),
+            })),
+        { role: "user", content: userContent },
+    ];
 
     let message = await client.messages.create({
-        max_tokens: 1024,
+        model: MODEL,
+        max_tokens: MAX_TOKENS,
         system: systemPrompt,
-        messages: [
-            ...formattedHistory,
-            {
-                role: "user",
-                content: userContent
-            }
-        ],
-        tools: tools,
-        model: config.model || "claude-haiku-4-5-20251001"
-    })
-    // console.log("message", message)
-    const MAX_TOOL_ITERATIONS = 8;
+        messages,
+        tools,
+    });
+
     let toolIterations = 0;
     while (message.stop_reason === "tool_use") {
         toolIterations++;
         if (toolIterations > MAX_TOOL_ITERATIONS) {
-            console.log(`Tool-use loop exceeded ${MAX_TOOL_ITERATIONS} iterations for user ${userId}, aborting.`);
-            const fallback = "Hey, I'm having trouble finishing that request right now. Could you try rephrasing it or breaking it into smaller steps?";
-            await saveMessage(userId, "assistant", fallback);
-            return fallback;
+            console.error(`Tool loop exceeded ${MAX_TOOL_ITERATIONS} iterations for user ${userId}, aborting.`);
+            await saveMessage(userId, "assistant", ABORTED_REPLY);
+            return ABORTED_REPLY;
         }
 
-        const toolBlocks = message.content.filter(block => block.type === "tool_use");
-        const toolResults = [];
+        // Every tool_use block needs a matching tool_result — including failures.
+        // Omitting one makes the next request invalid.
+        const toolResults: Anthropic.ToolResultBlockParam[] = [];
 
-        for (const block of toolBlocks) {
-            const tool = tools.find(t => t.name === block.name);
-            if (tool) {
-                console.log(block.input, "block.input")
-                const result = await toolExecuter(block.name, block.input, userId);
-                toolResults.push({
-                    type: "tool_result" as const,
-                    tool_use_id: block.id,
-                    content: JSON.stringify(result)
-                });
+        for (const block of message.content) {
+            if (block.type !== "tool_use") continue;
+
+            let result: unknown;
+            try {
+                result = await toolExecuter(block.name, block.input, userId);
+            } catch (error) {
+                // Return the failure to the model so it can correct itself,
+                // instead of throwing and losing the whole turn.
+                console.error(`Tool ${block.name} failed for user ${userId}:`, error);
+                result = { error: error instanceof Error ? error.message : String(error) };
             }
-        }
-        message = await client.messages.create({
-            max_tokens: 1024,
-            system: systemPrompt,
-            messages: [
-                ...formattedHistory,
-                { role: "user", content: userContent },
-                { role: "assistant", content: message.content },
-                { role: "user", content: toolResults }
-            ],
-            tools: tools,
-            model: config.model || "claude-haiku-4-5-20251001",
-        });
-        
-    }
-    const textBlock = message.content.find(block => block.type === "text")
-    await saveMessage(userId, "assistant", textBlock?.text ?? "Hey sorry, Something is not quite right, can yiu give me some time to fix it?");
-    return textBlock?.text ?? "Hey sorry, Something is not quite right, can yiu give me some time to fix it?"
 
+            toolResults.push({
+                type: "tool_result",
+                tool_use_id: block.id,
+                content: JSON.stringify(result),
+            });
+        }
+
+        // Accumulate rather than rebuild: later rounds need the earlier tool calls
+        // and their results, e.g. an id fetched by get_transactions and then updated.
+        messages.push({ role: "assistant", content: message.content });
+        messages.push({ role: "user", content: toolResults });
+
+        message = await client.messages.create({
+            model: MODEL,
+            max_tokens: MAX_TOKENS,
+            system: systemPrompt,
+            messages,
+            tools,
+        });
+    }
+
+    const textBlock = message.content.find(block => block.type === "text");
+    const reply = textBlock?.text ?? FALLBACK_REPLY;
+
+    await saveMessage(userId, "assistant", reply);
+    return reply;
 }

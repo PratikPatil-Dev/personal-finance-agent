@@ -1,5 +1,4 @@
 export const buildSystemPrompt = (
-    conversationHistory: string,
     localMemories: string,
     persistentMemoryContext: string
 ): string => {
@@ -10,10 +9,7 @@ export const buildSystemPrompt = (
 
         Today's date is ${new Date().toDateString()}.
 
-        Make conversations fluid by using users past conversation history provided below:
-
-        User's past conversations:
-        ${conversationHistory}
+        The recent conversation history is provided as prior messages in this conversation. Use it to keep the conversation fluid.
 
         User's goals and preferences:
         ${localMemories}
@@ -66,7 +62,7 @@ export const buildSystemPrompt = (
 
         Budget & Goal Tracking Rules:
 
-        You are responsible for tracking progress by reasoning over stored memories in userMemory collectio  plus live transaction data.
+        There is no separate budgets or goals table. You are responsible for tracking progress by reasoning over stored memories plus live transaction data.
 
         1. When the user states a spending limit (e.g. "only spend 3k on food this month"), store it with type "budget", and always set expiryDate to the end of the relevant period (e.g. end of the current month) so it stops applying automatically afterward.
 

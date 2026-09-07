@@ -15,7 +15,7 @@ export type AddMemoryInput = z.infer<typeof AddMemorySchema>;
 
 const addMemory = {
     name: "add_memory",
-    description: "add a important memory like users goals, budgets, plans, habbits, preferrances, relationships, etc. Use type 'budget' for spending limits (eg. 'spend only 3k on food this month') and type 'goal' for savings/target goals (eg. 'save 10k in 3 months'). Always set expiryDate for time-bound goals/budgets so they don't get applied after the period ends.",
+    description: "add a important memory like users goals, budgets, plans, habits, preferences, relationships, etc. Use type 'budget' for spending limits (eg. 'spend only 3k on food this month') and type 'goal' for savings/target goals (eg. 'save 10k in 3 months'). Always set expiryDate for time-bound goals/budgets so they don't get applied after the period ends.",
     input_schema: toInputSchema(AddMemorySchema),
 };
 
@@ -29,7 +29,7 @@ export type UpdateMemoryInput = z.infer<typeof UpdateMemorySchema>;
 
 const updateMemory = {
     name: "update_memory",
-    description: "Search existing memories before adding a new one. Always call this first when user mentions goals, preferences, or plans to check if a similar memory already exists. Update based on memoryId and userId",
+    description: "Update an existing memory in place — use this instead of add_memory when get_memory already returned a similar or related memory, so the same topic is refined rather than duplicated. IMPORTANT: requires a real memoryId from a previous get_memory call. Never guess a memoryId.",
     input_schema: toInputSchema(UpdateMemorySchema),
 };
 
@@ -40,7 +40,7 @@ export type GetMemoryInput = z.infer<typeof GetMemorySchema>;
 
 const getMemory = {
     name: "get_memory",
-    description: "get a important memory of user like their goals, plans, habbits, preferrances, relationships, etc. based on userId",
+    description: "get a important memory of user like their goals, plans, habits, preferences, relationships, etc. based on userId",
     input_schema: toInputSchema(GetMemorySchema),
 };
 

@@ -12,7 +12,7 @@ const addTransaction = {
             type: {
                 type: "string",
                 enum: ["income", "expense", "transfer"],
-                description: "Wheather this is money comin in or going out"
+                description: "Whether this is money coming in or going out"
             },
             category: {
                 type: "string",
@@ -59,7 +59,7 @@ const updateTransaction = {
             type: {
                 type: "string",
                 enum: ["income", "expense", "transfer"],
-                description: "Wheather this is money comin in or going out"
+                description: "Whether this is money coming in or going out"
             },
             category: {
                 type: "string",
@@ -91,7 +91,7 @@ const updateTransaction = {
 const deleteTransaction = {
     type: "function",
     name: "delete_transaction",
-    description: "delete a transaction from database based on tarnsactionId",
+    description: "delete a transaction from database based on transactionId",
     parameters: {
         type: "object",
         properties: {
@@ -107,7 +107,7 @@ const deleteTransaction = {
 const getTransaction = {
     type: "function",
     name: "get_transaction",
-    description: "get one ore more transactions from database based on user's provided information",
+    description: "get one or more transactions from database based on user's provided information",
     parameters: {
         type: "object",
         properties: {
@@ -122,7 +122,7 @@ const getTransaction = {
             type: {
                 type: "string",
                 enum: ["income", "expense", "transfer"],
-                description: "Wheather this is money comin in or going out"
+                description: "Whether this is money coming in or going out"
             },
             category: {
                 type: "string",

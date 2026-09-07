@@ -16,7 +16,6 @@ const isValidObjectId = (id: unknown): id is string =>
     typeof id === "string" && /^[a-f\d]{24}$/i.test(id);
 
 export const toolExecuter = async (toolName: string, input: unknown, userId: string) => {
-    console.log("toolName", toolName, input)
     switch (toolName) {
         case "add_transaction": {
             const parsed = AddTransactionSchema.parse(input);
@@ -27,14 +26,14 @@ export const toolExecuter = async (toolName: string, input: unknown, userId: str
             if (!isValidObjectId(parsed.transactionId)) {
                 return { error: "Invalid transactionId. Call get_transactions first to find the real ID." };
             }
-            return await updateTransaction(parsed);
+            return await updateTransaction(userId, parsed);
         }
         case "delete_transaction": {
             const parsed = DeleteTransactionSchema.parse(input);
             if (!isValidObjectId(parsed.transactionId)) {
                 return { error: "Invalid transactionId. Call get_transactions first to find the real ID." };
             }
-            return await deleteTransaction(parsed.transactionId);
+            return await deleteTransaction(userId, parsed.transactionId);
         }
         case "get_transactions": {
             const parsed = GetTransactionsSchema.parse(input);
@@ -46,7 +45,7 @@ export const toolExecuter = async (toolName: string, input: unknown, userId: str
         }
         case "update_memory": {
             const parsed = UpdateMemorySchema.parse(input);
-            return await updateMemory(parsed.memoryId, parsed.memory, parsed.type, parsed.expiryDate ? new Date(parsed.expiryDate) : undefined);
+            return await updateMemory(userId, parsed.memoryId, parsed.memory, parsed.type, parsed.expiryDate ? new Date(parsed.expiryDate) : undefined);
         }
         case "get_memory": {
             const parsed = GetMemorySchema.parse(input);
