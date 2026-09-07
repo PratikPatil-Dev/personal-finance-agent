@@ -13,7 +13,7 @@ const PORT = Number(config.port ?? 8888);
 app.use(express.json());
 
 app.get("/", (req: Request, res: Response) => {
-  res.json({ message: "Express + TypeScript server is running" });
+  res.json({ message: "personal-finance-agent is running" });
 });
 
 app.post("/webhook/telegram", handleWebhook);
