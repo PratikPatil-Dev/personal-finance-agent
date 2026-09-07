@@ -1,7 +1,7 @@
 {
   "name": "personal-finance-agent",
   "version": "1.0.0",
-  "description": "Minimal Node.js + TypeScript starter using tsx",
+  "description": "A Telegram personal finance assistant built as a tool-calling AI agent from scratch on the Anthropic API",
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
@@ -11,8 +11,8 @@
     "set-webhook": "tsx src/scripts/setTGWebhook.ts",
     "add-test-data": "tsx src/scripts/addTestData.ts"
   },
-  "author": "pratik patil",
-  "license": "ISC",
+  "author": "Pratik Patil",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/PratikPatil-Dev/personal-finance-agent.git"

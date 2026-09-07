@@ -9,7 +9,27 @@ env:
   IMAGE: ghcr.io/pratikpatil-dev/personal-finance-agent
 
 jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
   build-and-push:
+    needs: typecheck
     runs-on: ubuntu-24.04-arm
     permissions:
       contents: read
