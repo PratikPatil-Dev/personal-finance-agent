@@ -1,0 +1,8 @@
+services: 
+  app: 
+    image: ghcr.io/pratikpatil-dev/personal-finance-agent:latest
+    container_name: pfa
+    env_file: .env
+    ports: 
+      - "127.0.0.1:8888:8888"
+    restart: unless-stopped
