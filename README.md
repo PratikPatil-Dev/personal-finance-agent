@@ -10,9 +10,7 @@ Photograph a receipt and it reads the line items, categorises them, and logs eac
 transaction. Tell it "spend only 3k on food this month" and it tracks that against what you
 actually spend, without a budgets table existing anywhere.
 
-<!-- TODO: drop the recording in at assets/demo.gif, then uncomment the line below.
 ![Sending a receipt photo and getting the line items logged back](assets/demo.gif)
--->
 
 
 ## What it does
