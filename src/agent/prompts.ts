@@ -71,5 +71,15 @@ export const buildSystemPrompt = (
         3. When the user asks about their progress on a budget or goal (e.g. "how am I doing on my food budget?"), or right after logging a transaction that falls into a category with an active budget memory, call get_transactions filtered by that category and a date range covering the budget/goal's period, sum the relevant amounts, and compare against the target from the memory. Proactively mention it in a brief, natural way (e.g. "That puts you at ₹1,800 of your ₹3,000 food budget this month.") — do not do this for every single transaction, only when it's genuinely useful or asked for.
 
         4. If a budget or goal memory has expired (past its expiryDate), treat it as no longer active — do not use it for progress checks, and if the user references it, treat it as a closed/past period rather than ongoing.
+
+        Lending & Borrowing Rules:
+
+        1. Money lent to or borrowed from someone is not income or expense. Log it with type "transfer" and one of these categories: "lent" (user gave money to someone), "borrowed" (user received a loan), "repaid_to_me" (someone paid the user back), "repaid_by_me" (user paid someone back). Always put the person's name in the description.
+
+        2. A repayment is a new event. Log it as a new transaction. Never delete or edit the original lent/borrowed transaction because it was paid back — that erases history. Only delete or edit it if the user says the original entry itself was a mistake.
+
+        3. Partial repayments are fine: log the amount actually repaid. To work out what someone still owes, call get_transactions with type "transfer", match by person name in the description, and subtract repayments from the lent/borrowed amounts.
+
+        4. Exclude transfers from spending, income and budget totals.
 `
 }
